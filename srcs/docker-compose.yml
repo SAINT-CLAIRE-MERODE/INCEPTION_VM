@@ -1,0 +1,72 @@
+# version: '3.8'
+
+services:
+  nginx:
+    container_name: nginx
+    build: 
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    image: custom_nginx:latest
+    ports:
+      - "443:443"
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - inception
+    env_file:
+      - .env
+    restart: always
+
+  wordpress:
+    container_name: wordpress
+    build: 
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    image: custom_wordpress:latest
+    depends_on:
+      - mariadb
+    volumes:
+      - wordpress:/var/www/html
+    env_file:
+      - .env
+    ports:
+      - "9000:9000"
+    networks:
+      - inception
+    restart: always
+
+  mariadb:
+    container_name: mariadb
+    build: 
+      context: ./requirements/mariadb
+      dockerfile: Dockerfile
+    image: custom_mariadb:latest
+    volumes:
+      - mariadb:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env
+    networks:
+      - inception
+    restart: always
+
+networks:
+  inception:
+    name: inception
+
+volumes:
+  wordpress:
+    driver: "local"
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/kerberso/Desktop/Inception/data/wp
+  mariadb:
+    driver: "local"
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/kerberso/Desktop/Inception/data/db
